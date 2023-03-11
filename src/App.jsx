@@ -1,12 +1,12 @@
-
-
-import './App.css'
+/* eslint-disable space-before-function-paren */
+import 'App.css'
 
 function App() {
-
   return (
-    <div className="App">
-    
+    <div className='App'>
+      <>
+        <p>hola</p>
+      </>
     </div>
   )
 }
