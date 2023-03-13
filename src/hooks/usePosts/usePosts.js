@@ -1,22 +1,26 @@
 import { useEffect, useState } from 'react'
 import { _get } from '../../lib/axios'
+import swal from 'sweetalert'
 
-export function usePosts() {
+export function usePosts () {
   const [posts, setPosts] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     _get(
       '/posts',
       (res) => {
-        console.log(res)
         if (res.data) {
-          console.log(res.data)
           setPosts(res.data)
+          setLoading(false)
         }
       },
-      (error) => console.log(error.message)
+      (error) => {
+        swal('error', error.message, 'error')
+        setLoading(false)
+      }
     )
   }, [])
 
-  return { posts }
+  return { posts, loading }
 }

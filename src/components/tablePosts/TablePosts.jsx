@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { _delete, _get } from '../../lib/axios'
+import { _delete } from '../../lib/axios'
 import PropTypes from 'prop-types'
 import { useTheme } from '@mui/material/styles'
 import { useNavigate } from 'react-router-dom'
@@ -20,10 +20,11 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight'
 import LastPageIcon from '@mui/icons-material/LastPage'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 import EditIcon from '@mui/icons-material/Edit'
+import Backdrop from '@mui/material/Backdrop'
+import CircularProgress from '@mui/material/CircularProgress'
 import './TablePosts.css'
 import swal from 'sweetalert'
-
-function TablePaginationActions(props) {
+function TablePaginationActions (props) {
   const theme = useTheme()
   const { count, page, rowsPerPage, onPageChange } = props
 
@@ -57,22 +58,26 @@ function TablePaginationActions(props) {
         disabled={page === 0}
         aria-label='previous page'
       >
-        {theme.direction === 'rtl' ? (
-          <KeyboardArrowRight />
-        ) : (
-          <KeyboardArrowLeft />
-        )}
+        {theme.direction === 'rtl'
+          ? (
+            <KeyboardArrowRight />
+            )
+          : (
+            <KeyboardArrowLeft />
+            )}
       </IconButton>
       <IconButton
         onClick={handleNextButtonClick}
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
         aria-label='next page'
       >
-        {theme.direction === 'rtl' ? (
-          <KeyboardArrowLeft />
-        ) : (
-          <KeyboardArrowRight />
-        )}
+        {theme.direction === 'rtl'
+          ? (
+            <KeyboardArrowLeft />
+            )
+          : (
+            <KeyboardArrowRight />
+            )}
       </IconButton>
       <IconButton
         onClick={handleLastPageButtonClick}
@@ -92,18 +97,22 @@ TablePaginationActions.propTypes = {
   rowsPerPage: PropTypes.number.isRequired
 }
 
-export default function CustomPaginationActionsTable ({ posts }) {
+export default function TablePosts ({ posts }) {
   const navigate = useNavigate()
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(5)
   const [rows, setRows] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    localStorage.setItem('POSTS', JSON.stringify(posts))
-    setRows(posts)
+    const postsSaved = JSON.parse(window.localStorage.getItem('POSTS'))
+    if (postsSaved) {
+      setRows(postsSaved)
+    } else {
+      setRows(posts)
+    }
   }, [posts])
 
-  // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0
 
@@ -117,32 +126,35 @@ export default function CustomPaginationActionsTable ({ posts }) {
   }
 
   const editPost = (post) => {
-    console.log('post a editar', post)
     navigate('/create', { state: { posts: rows, postToEdit: post } })
   }
 
   const deletePost = (postId) => {
-    console.log('post a eliminar', postId)
-
-    _delete(
-      `/posts/${postId}`,
-      (res) => {
-        console.log(res)
-        if (res.data) {
-          console.log(res.data)
-          swal('Posts Eliminado', 'Post eliminado con exito', 'success')
-          setRows(rows.filter((row) => row.id !== postId))
-        }
-      },
-      (error) => console.log(error.message)
+    setLoading(true)
+    window.localStorage.setItem(
+      'POSTS',
+      JSON.stringify(rows.filter((row) => row.id !== postId))
     )
+    setRows(rows.filter((row) => row.id !== postId))
+    if (postId <= 100) {
+      _delete(
+        `/posts/${postId}`,
+        (res) => {
+          if (res.data) {
+            swal('Posts Eliminado', 'Post eliminado con exito', 'success')
+            setLoading(false)
+          }
+        },
+        (error) => swal('error', error.message, 'error')
+      )
+    } else {
+      swal('Posts Eliminado', 'Post eliminado con Exito', 'success')
+      setLoading(false)
+    }
   }
 
   return (
     <div>
-      <button onClick={() => navigate('/create', { state: { posts: rows } })}>
-        create posts
-      </button>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 500 }} aria-label='custom pagination table'>
           <TableHead>
@@ -157,12 +169,12 @@ export default function CustomPaginationActionsTable ({ posts }) {
             {rows
               ? (rowsPerPage > 0
                   ? rows.slice(
-                      page * rowsPerPage,
-                      page * rowsPerPage + rowsPerPage
-                    )
+                    page * rowsPerPage,
+                    page * rowsPerPage + rowsPerPage
+                  )
                   : rows
                 ).map((row) => (
-                  <TableRow key={row.name}>
+                  <TableRow key={row.id}>
                     <TableCell className='titleCell'>{row.title}</TableCell>
                     <TableCell align='left' className='bodyCell'>
                       {row.body}
@@ -209,6 +221,12 @@ export default function CustomPaginationActionsTable ({ posts }) {
           </TableFooter>
         </Table>
       </TableContainer>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color='inherit' />
+      </Backdrop>
     </div>
   )
 }

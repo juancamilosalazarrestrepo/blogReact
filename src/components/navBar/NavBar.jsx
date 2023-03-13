@@ -1,15 +1,17 @@
-//import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
+import './NavBar.css'
 
 function NavBar ({ posts }) {
   return (
-    <div>
-      <ul>
+    <div className='navBar'>
+      <ul className='navBarList'>
         <li>
-          <Link to='/'>Lista de posts</Link>
+          <Link to='/' className='navLink'>
+            Lista de posts
+          </Link>
         </li>
         <li>
-          <Link to='/create' state={{ posts: posts }}>
+          <Link to='/create' state={{ posts }} className='navLink'>
             Crear posts
           </Link>
         </li>

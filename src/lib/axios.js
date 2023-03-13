@@ -20,7 +20,6 @@ export const _get = async (end, callback, callbackError) => {
 }
 
 export const _post = async (end, data, callback, callbackError) => {
-  console.log(data)
   await axios
     .post(`${baseURL}${end}`, data)
     .then((res) => callback(res))

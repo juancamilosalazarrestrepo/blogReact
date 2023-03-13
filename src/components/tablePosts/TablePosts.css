@@ -5,10 +5,14 @@ width: 400px;
   width: 800px;
 }
 
+button{
+  background: none;
+  border: none;
+}
 .icon {
   color: #3f50b5;
 }
 
 .icon:hover {
-  color: #002884;
+  color: #03a9f4;
 }
