@@ -1,27 +1,11 @@
-import { useEffect } from 'react'
-import { postApi, _get } from './lib/axios'
+import './App.css'
+import { Component } from 'react'
+import { routes } from './routes/routes'
 
-function App () {
-  useEffect(() => {
-    _get(
-      '/posts',
-      (res) => {
-        console.log(res)
-        if (res.data.ok) {
-          console.log(res)
-        }
-      },
-      (error) => console.log(error.message)
-    )
-  }, [])
-
-  return (
-    <div className='App'>
-      <>
-        <p>hola</p>
-      </>
-    </div>
-  )
+class App extends Component {
+  render () {
+    return routes
+  }
 }
 
 export default App
